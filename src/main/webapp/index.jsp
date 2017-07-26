@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>生财有道</title>
+<title>生财有道dsadasdasdaz1</title>
 <%@include file="/public_page/base_address.jsp"%>
 <link type="text/css" rel="stylesheet" href="${projectPath}/css/carousel.css" >
 <link type="text/css" rel="stylesheet" href="${projectPath}/css/font-awesome.min.css" >
