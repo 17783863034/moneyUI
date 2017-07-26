@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- Spring只来配置网站的业务逻辑组件除了Controller和全局异常ControllerAdvice交给SpringMVC剩下都是spring配置文件管理
+    -->
+    <context:component-scan base-package="com.create.managerMoney">
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+	<!-- 	引入外部配置数据源的属性文件 -->
+<!-- 配置可继承的数据源 -->
+	<bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="dataSource" abstract="true">
+		<property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+	</bean>
+<!-- 	配置主数据库 -->
+	<bean parent="dataSource" id="mainDataSource">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+	</bean>
+<!-- 	配置日志数据库 -->
+	<bean parent="dataSource" id="logDataSource">
+		<property name="jdbcUrl" value="${log.jdbcUrl}"></property>
+	</bean>
+<!-- 	配置路由器数据源 -->
+	<bean class="com.create.managerMoney.router.LogRouter" id="logRouter">
+		<property name="targetDataSources">
+			<map>
+<!-- 			配置具体数据源的键值对 -->
+				<entry key="MAIN_DATA_SOURCE" value-ref="mainDataSource"></entry>
+				<entry key="LOG_DATA_SOURCE" value-ref="logDataSource"></entry>
+			</map>
+		</property>
+<!-- 		配置默认数据源 -->
+		<property name="defaultTargetDataSource" ref="mainDataSource"></property>
+	</bean>
+<!--      配置数据源   -->
+<!--      <bean id="maindataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"> -->
+<!--           <property name="user" value="${jdbc.user}"></property> -->
+<!--           <property name="password" value="${jdbc.password}"></property> -->
+<!--           <property name="driverClass" value="${jdbc.driverClass}"></property> -->
+<!--           <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property> -->
+<!--      </bean> -->
+<!--       <context:property-placeholder location="classpath:c3p0.properties"/> -->
+    
+     <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+   			<property name="locations">
+   				<list>
+   					<value>classpath:connection.properties</value>
+   					<value>classpath:c3p0.properties</value>
+   				</list>
+   			</property>
+     </bean>
+     
+<!--      <context:property-placeholder location="classpath:connection.properties" /> -->
+<!--       <context:property-placeholder location="classpath:c3p0.properties"/> -->
+   	
+     <!--  配置jdbc声明式管理器--> 
+     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+          <property name="dataSource" ref="logRouter"></property>
+     </bean>
+
+     <!-- 配置事务切面 -->
+     <aop:config>
+             <!-- 配置事务切入点 -->
+          <aop:pointcut expression="execution(* com.create.managerMoney.service.*.*(..))" id="pointcutId"/>
+           <!--事务增强器  -->
+          <aop:advisor advice-ref="txadvice" pointcut-ref="pointcutId" order="2"/>
+     </aop:config>
+
+     <!-- 配置事务增强；事务属性 -->
+     <tx:advice id="txadvice" transaction-manager="transactionManager">
+          <tx:attributes>            
+              <!-- 所有的事务方法都必须在tx:method这里明确配置才生效，否则就没有事务 -->
+              <!-- 方法名使用“*”通配符或完整名称都可以 -->
+              <tx:method name="get*" read-only="true"/>
+              
+              <!-- Spring的声明式事务默认仅对运行时异常回滚，如果发生编译时异常不回滚 -->
+              <!-- 所以我们应该配置rollback-for="java.lang.Exception"对所有异常都回滚 -->
+              <tx:method name="save*" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
+              
+              <!-- Spring的声明式事务默认使用的传播行为是：REQUIRED，含义是：必须在事务中运行，但如果已经有事务则在现有事务中运行，不开启新事务 -->
+              <!-- 在其他事务中运行的风险是：如果同一个事务中的其他操作回滚了，当前操作也会被连累。 -->
+              <!-- 所以应该使用REQUIRES_NEW，必须运行在事务中，且必须开启新事务。 -->
+              <tx:method name="update*" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
+              <tx:method name="remove*" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
+          </tx:attributes>
+     </tx:advice>
+        
+	<bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!--告诉spring mybits的配置文件在哪个地方 -->
+		<property name="configLocation" value="classpath:mybits.xml"></property>
+		<!-- 引入文件源 -->
+		<property name="dataSource" ref="logRouter"></property>
+		<!--告诉spring mybits-mapper的配置文件在哪个地方 -->
+		<!-- <property name="mapperLocations" value="classpath:com/atguigu/survey/component/mapper/*.xml"></property> -->
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<props>
+							<prop key="dialect">mysql</prop>
+							<!-- 将前台页面传入的页码修正到1~总页数之间的范围 -->
+							<prop key="reasonable">true</prop>
+						</props>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<!-- 把mybits生成的类放到spring中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.create.managerMoney.mapper"></property>
+	</bean>
+      <!-- 	配置日志的事务切面 -->
+	<bean id="logRecrder" class="com.create.managerMoney.log.aspect.LogRecrder"></bean>
+<!-- 	配置切入点 -->
+	<aop:config>
+		<aop:pointcut expression="(execution(* *..*Service.update*(..)) 
+								or execution(* *..*Service.delete*(..)) 
+								or execution(* *..*Service.get(..)) 
+								or execution(* *..*Service.save*(..))) and !bean(logServiceImp)" id="logPointcut"/>
+		<aop:aspect id="logAspect" ref="logRecrder" order="0">
+			<aop:around method="recordLog" pointcut-ref="logPointcut"/>
+		</aop:aspect>
+	</aop:config>
+<!-- 	配置建立日志表的监听器 -->
+	<bean id="CreateTableListener" class="com.create.managerMoney.listener.CreateTableListener"></bean>
+<!-- 	石英调度配置 -->
+	<bean class="org.springframework.scheduling.quartz.JobDetailBean" id="jobDetailBean">
+		<property name="jobClass" value="com.create.managerMoney.log.quartz.CreateTableJob"></property>
+		<property name="jobDataMap">
+			<map>
+				<entry key="logService"  value-ref="logServiceImp"></entry>
+			</map>
+		</property>
+	</bean>
+		<bean class="org.springframework.scheduling.quartz.JobDetailBean" id="jobDetailBean1">
+	
+		<property name="jobClass" value="com.create.managerMoney.log.quartz.GetFundfromWeb"></property>
+		<property name="jobDataMap">
+			<map>
+				<entry key="fundService" value-ref="fundServiceImpl"></entry>
+			</map>
+		</property>
+	</bean>
+	
+	
+<!-- 	配置克龙表达式 -->
+	<bean class="org.springframework.scheduling.quartz.CronTriggerBean" id="cronTriggerBean">
+		<property name="cronExpression" value="* * * 15 * ?"></property>
+		<property name="jobDetail" ref="jobDetailBean"></property>
+	</bean>
+		<bean class="org.springframework.scheduling.quartz.CronTriggerBean" id="cronTriggerBean1">
+		<property name="cronExpression" value="0 0 0 * * ?"></property>
+		<property name="jobDetail" ref="jobDetailBean1"></property>
+	</bean>
+	<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="cronTriggerBean"/>
+				<ref bean="cronTriggerBean1"/>
+			</list>
+		</property>
+	</bean>
+     
+     <!-- 配置CXF -->
+     
+     <bean id="poolingHttpClientConnectionManager"
+		class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager"
+		destroy-method="close">
+		<!-- 最大连接数 -->
+		<property name="maxTotal" value="${http.maxTotal}"></property>
+		<!-- 每个主机的并发数 -->
+		<property name="defaultMaxPerRoute" value="${http.defaultMaxPerRoute}"></property>
+	</bean>
+	<bean id="httpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder">
+		<!-- 装配连接池管理器 -->
+		<property name="connectionManager" ref="poolingHttpClientConnectionManager" />
+	</bean>
+
+	<bean id="httpClient" class="org.apache.http.impl.client.CloseableHttpClient"
+		factory-bean="httpClientBuilder" factory-method="build" scope="prototype" />
+
+	<bean id="idleConnectionEvictor" class="com.create.managerMoney.IdleConnection.IdleConnectionEvictor"
+		destroy-method="shutdown">
+		<constructor-arg index="0"
+			ref="poolingHttpClientConnectionManager" />
+	</bean>
+
+	<bean id="requestConfigBuilder" class="org.apache.http.client.config.RequestConfig.Builder">
+		<!-- 创建连接的最长时间 -->
+		<property name="connectTimeout" value="${http.connectTimeout}" />
+		<!-- 从连接池中获取到连接的最长时间 -->
+		<property name="connectionRequestTimeout" value="${http.connectionRequestTimeout}" />
+		<!-- 数据传输的最长时间 -->
+		<property name="socketTimeout" value="${http.socketTimeout}" />
+		<!-- 提交请求前测试连接是否可用 -->
+		<property name="staleConnectionCheckEnabled" value="${http.staleConnectionCheckEnabled}" />
+	</bean>
+
+	<bean id="requestConfig" class="org.apache.http.client.config.RequestConfig"
+		factory-bean="requestConfigBuilder" factory-method="build" />
+
+</beans>

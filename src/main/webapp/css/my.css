@@ -1,0 +1,196 @@
+@CHARSET "UTF-8";
+
+body {
+	padding-top: 0px;
+	padding-bottom: 20px;
+	margin-top: 0px;
+}
+
+.navbar {
+	margin-bottom: 20px;
+}
+
+
+h4 {
+	text-align: center;
+}
+
+.bottomDiv {
+	background-color: #f8f8f8;
+	border-radius: 4px;
+	border: 1px solid transparent;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.inputLen {
+	/* 	width: 100px; */
+	/* 	text-align: center; */
+	
+}
+
+.checkerror {
+	color: red;
+}
+
+.dropdown-submenu {
+	position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+	top: 0;
+	left: 100%;
+	margin-top: -6px;
+	margin-left: -1px;
+	-webkit-border-radius: 0 6px 6px 6px;
+	-moz-border-radius: 0 6px 6px;
+	border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+	display: block;
+}
+
+.dropdown-submenu>a:after {
+	display: block;
+	content: " ";
+	float: right;
+	width: 0;
+	height: 0;
+	border-color: transparent;
+	border-style: solid;
+	border-width: 5px 0 5px 5px;
+	border-left-color: #ccc;
+	margin-top: 5px;
+	margin-right: -10px;
+}
+
+.TYPEclass {
+	position: absolute;
+	top: 30%;
+	left: 380px;
+}
+
+.Accountclass {
+	position: absolute;
+	top: 30%;
+	left: 40%;
+}
+
+.Moneyclass {
+	position: absolute;
+	top: 30%;
+	left: 52%;
+}
+
+.Timeclass {
+	position: absolute;
+	top: 30%;
+	left: 67%;
+}
+
+.Messageclass {
+	position: absolute;
+	top: 38%;
+	left: 28%;
+}
+
+.buttonclass {
+	position: absolute;
+	top: 38%;
+	left: 69%;
+}
+
+.accountListClass {
+	position: absolute;
+	top: 500px;
+	left: 100px;
+}
+
+.moneyCalcular {
+	position: absolute;
+	top: 500px;
+	left: 700px;
+}
+
+.allListclass {
+	position: absolute;
+	top: 550px;
+	left: 100px;
+}
+
+.chooseType {
+	position: absolute;
+	top: 550px;
+	left: 300px;
+}
+
+.allAccount {
+	position: absolute;
+	top: 550px;
+	left: 500px;
+}
+
+.allTime {
+	position: absolute;
+	top: 550px;
+	left: 700px;
+}
+
+.conditionclass {
+	position: absolute;
+	top: 550px;
+	left: 920px;
+}
+
+.sunmitClass {
+	position: absolute;
+	top: 550px;
+	left: 1120px;
+}
+
+.menuClass {
+	position: absolute;
+	top: 610px;
+	left: 100px;
+}
+
+.logClass {
+	position: absolute;
+	top: 660px;
+	left: 210px;
+}
+
+.imgClass {
+	position: absolute;
+	top: 210px;
+	left: 100px;
+}
+
+.dropdown-submenu:hover>a:after {
+	border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+	float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+	left: -100%;
+	margin-left: 10px;
+	-webkit-border-radius: 6px 0 6px 6px;
+	-moz-border-radius: 6px 0 6px 6px;
+	border-radius: 6px 0 6px 6px;
+}
+.model_location{
+	position: absolute;
+	top: 10px;
+	left: 10px;
+}
+.model_location_name{
+	position: absolute;
+	top: 8px;
+	left: 200px;
+}

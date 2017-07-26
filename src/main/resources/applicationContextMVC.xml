@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:mvc="http://www.springframework.org/schema/mvc"
+     xmlns:context="http://www.springframework.org/schema/context"
+     xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- SpringMVC配置网站的跳转逻辑，以及其他功能 除过管理网站控制逻辑组件，其他都交给Spring：
+     只用来扫描Controller\ControllerAdvice组件
+     -->
+    <context:component-scan base-package="com.create.managerMoney" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+     <!-- 还可配置内置视图解析器 -->
+     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+          <property name="prefix" value="/WEB-INF/"></property>
+          <property name="suffix" value=".jsp"></property>
+     </bean>
+
+<!--      view-name属性：逻辑视图名称，“就是以前handler方法返回的那个字符串” 根据实际情况开启-->
+<!--     <mvc:view-controller path="/guest/user/toRegistUI" view-name="guest/user_regist"/> -->
+		<mvc:view-controller path="/create/managerMoney/community/toCommunityPage/1" view-name="community/community_index"/>
+		<mvc:view-controller path="/create/managerMoney/community/toPostPage" view-name="community/post"/>
+		<mvc:view-controller path="/create/managerMoney/user/toRegistUI" view-name="guest/user_regist"/>
+		<mvc:view-controller path="/create/managerMoney/user/toLoginUI" view-name="guest/user_login"/>
+		<mvc:view-controller path="/create/managerMoney/user/toindexUI" view-name="index/index"/>
+		<mvc:view-controller path="/create/manager/admin/toManager" view-name="manager_log/admin_main"/>
+		<mvc:view-controller path="/create/managerMoney/user/tochangePassword" view-name="guest/changePassword"/>
+    
+    	<!--配置异常映射 -->
+	<bean
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<!-- exceptionMappings：配置异常映射：定义哪些异常区哪些页面的规则 他是Properties类型 -->
+		<property name="exceptionMappings">
+			<props>
+
+				<prop key="java.lang.RuntimeException">error</prop>
+			</props>
+		</property>
+	</bean>
+    
+    
+    
+    <mvc:annotation-driven></mvc:annotation-driven>
+    <!-- 使spring可以响应静态文件 -->
+    <mvc:default-servlet-handler/>
+    <!-- 	自定义拦截器 -->
+	<mvc:interceptors>
+<!-- 		日志拦截器 -->
+			<bean class="com.create.managerMoney.interceptor.RequestBindInterceptor" id="RequestBindInterceptor"></bean>
+	</mvc:interceptors>
+<!-- 配置MultiPart解析器 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+</beans>
