@@ -11,7 +11,7 @@
 <%@include file="/public_page/base_address.jsp"%>
 <link type="text/css" rel="stylesheet" href="${projectPath}/css/carousel.css" >
 <link type="text/css" rel="stylesheet" href="${projectPath}/css/font-awesome.min.css" >
-dsdsdsds
+dsdsdsds....bug
 <style>
     h3 {
         font-weight:bold;
